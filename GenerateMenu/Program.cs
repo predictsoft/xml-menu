@@ -10,6 +10,15 @@ using System.Xml.Schema;
 
 namespace GenerateMenu
 {
+
+    class ItemNode
+    {
+        public string Name { get; set; }
+        public string Path { get; set; }
+        public bool IsActive { get; set; }
+        public List<ItemNode> SubItems { get; set; }
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -30,16 +39,80 @@ namespace GenerateMenu
             }
 
             //Console.WriteLine(parseXMLBruteforce(args[0], args[1]));
-            Console.WriteLine(parseXMLRecursive(args[0], args[1]));
+            //Console.WriteLine(ParseXmlRecursive(args[0], args[1]));
+            Console.WriteLine(PrintXMLMenu(args[0],args[1]));
         }
 
-        private static string parseXMLRecursive(string XMLFile, string TargetPath)
+        private static string PrintXMLMenu(string xmlFile, string activePath)
+        {
+            var menuTree = new List<ItemNode>();
+            var tmpNode = new ItemNode();
+            tmpNode.SubItems = new List<ItemNode>();
+
+            var xDoc = XElement.Load(xmlFile);
+
+            var rootChildren = xDoc.Elements();
+
+            foreach (var node in rootChildren)
+            {
+                if (node.Name == "item")
+                {
+                    tmpNode = createNode(node);
+                    if (node.Elements("subMenu").Any())
+                    {
+                        foreach (var smItem in node.Elements("subMenu").Elements("item"))
+                        {
+                            var newNode = createNode(smItem);
+                            tmpNode.SubItems.Add(newNode);
+                        }
+                    }
+
+                    tmpNode.IsActive = false;
+                    //tmpNode = new ItemNode() { Name = node.Element("displayName").ToString(), Path = }
+
+
+                }
+                var i = node.Name;
+                var v = node.Value;
+                //if(node.Name == "")
+            }
+            return "";
+        }
+
+        /*
+         * Creates an itemnode object from a given <item> node
+         */
+        private static ItemNode createNode(XElement node)
+        {
+            var retNode = new ItemNode();
+            var elName = node.Element("displayName");
+            var elPath = node.Element("path");
+
+            if (elName != null)
+            {
+                retNode.Name = elName.Value;
+            }
+
+            if (elPath != null && elPath.Attribute("value") != null)
+            {
+                retNode.Path = elPath.Attribute("value").Value;
+            }
+
+            return retNode;
+        }
+
+
+
+
+
+        private static string ParseXmlRecursive(string xmlFile, string targetPath)
         {
             var doc = new XmlDocument();
+            StringBuilder menuList = new StringBuilder();
             try
             {
-                doc.Load(XMLFile);
-                TraverseNodes(doc.ChildNodes);
+                doc.Load(xmlFile);
+                Console.WriteLine(TraverseNodes(doc.FirstChild, menuList).ToString());
                 return "";
             }
             catch (Exception e)
@@ -49,22 +122,27 @@ namespace GenerateMenu
             }
         }
 
-        private static void TraverseNodes(XmlNodeList nodes)
+        private static StringBuilder TraverseNodes(XmlNode rootNode, StringBuilder menuListString)
         {
-            foreach (XmlNode node in nodes)
+            foreach (XmlNode node in rootNode.ChildNodes)
             {
+                /*if (!node.HasChildNodes)
+                {
+                    return menuListString;
+                }*/
                 //if (node.Name == "item")
                 {
-
-                    Console.WriteLine(node.Name);
+                    menuListString.Append(node.Name.ToString());
                 }
                 //else if(node.Name)
                 
-                TraverseNodes(node.ChildNodes);
+                return TraverseNodes(node.FirstChild, menuListString);
             }
+            
+            return menuListString;
         }
 
-        private static string parseXMLBruteforce(string xmlFile, string menuPath)
+        private static string ParseXmlBruteforce(string xmlFile, string menuPath)
         {
             /*XElement xelement1 = XElement.Load("../../menu1.xml");
             var item1 = from nm in xelement1.Elements("item")
