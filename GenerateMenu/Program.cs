@@ -220,7 +220,7 @@ namespace GenerateMenu
                 foreach (var subItem in menuItem.SubItems)
                 {
                     //Console.WriteLine("\t");
-                    printNode(subItem,"\t");
+                    printNode(subItem, tab + "\t");
                 }
             }
             
