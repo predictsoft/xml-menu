@@ -42,20 +42,27 @@ namespace GenerateMenu
 
             //Console.WriteLine(parseXMLBruteforce(args[0], args[1]));
             //Console.WriteLine(ParseXmlRecursive(args[0], args[1]));
-            Console.WriteLine(PrintXMLMenu(args[0],args[1]));
+            //Console.WriteLine(PrintXMLMenu("./menu2.xml",args[1]));
+            Console.WriteLine(PrintXMLMenu(args[0], args[1]));
         }
 
         private static string PrintXMLMenu(string xmlFile, string activePath)
         {
-            //var menuTree = new List<ItemNode>();
+            var menu = new List<ItemNode>();
             var tmpNode = new ItemNode();
             tmpNode.SubItems = new List<ItemNode>();
 
             var xDoc = XElement.Load(xmlFile);
 
             var rootChildren = xDoc.Elements();
-            recursionHell(xDoc);
-            return parseMenuTree(menuTree,activePath);
+            //recursionHell(xDoc);
+            //
+
+            foreach (var node in xDoc.Elements())
+            {
+                menu.Add(BuildTree(node));
+            }
+            return parseMenuTree(menuTree, activePath);
         }
 
         private static string PrintXMLMenu2(string xmlFile, string activePath)
@@ -125,9 +132,42 @@ namespace GenerateMenu
             return "TODO: print the tree after iterating through each item";
         }
 
+        private static ItemNode BuildTree(XElement rootNode)
+        {
+            // first using the non-custom class approach (isactive is checked when tree is parsed into string later)
+            /*
+             * 1. for every child node cN of this rootNode:
+             *      a. if (cN == "item")
+             *          i. Add cN to menuTree
+             *          ii. if cN has submenu element
+             *              foreach child element ccN in submenu
+             *                  buildTree(ccN)
+             */
+            var tmpNode = new ItemNode();
+            if (rootNode.Name == "item")
+            {
+                tmpNode = createNode(rootNode); //add to menu tree
+                if (rootNode.Elements("subMenu").Any())
+                {
+                    tmpNode.SubItems = new List<ItemNode>();
+                    foreach (var childNode in rootNode.Elements("subMenu").Elements("item"))
+                    {
+
+                        tmpNode.SubItems.Add(BuildTree(childNode));
+                        //TODO: maybe a global string to check for active item?
+                    }
+                }
+                return tmpNode;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         private static void recursionHell(XElement rootNode)
         {
-            var tmpNode =new ItemNode();
+            var tmpNode = new ItemNode();
             //analyze each node and either add to menu tree (if item node), or call this function with child element recursively
             if (rootNode.Name == "item")
             {
@@ -143,7 +183,7 @@ namespace GenerateMenu
                     recursionHell(node);
                 }
             }
-            if ( rootNode.Element("subMenu")!= null)
+            if (rootNode.Element("subMenu") != null)
             {
                 //recursionHell(rootNode.Elements("subMenu").GetEnumerator());
                 foreach (var x in rootNode.Element("subMenu").Elements())
@@ -183,10 +223,10 @@ namespace GenerateMenu
                     menuListString.Append(node.Name.ToString());
                 }
                 //else if(node.Name)
-                
+
                 return TraverseNodes(node.FirstChild, menuListString);
             }
-            
+
             return menuListString;
         }
 
