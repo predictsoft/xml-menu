@@ -21,6 +21,8 @@ namespace GenerateMenu
 
     class Program
     {
+        static List<ItemNode> menuTree = new List<ItemNode>();
+
         static void Main(string[] args)
         {
             if (args.Length != 2)
@@ -44,6 +46,19 @@ namespace GenerateMenu
         }
 
         private static string PrintXMLMenu(string xmlFile, string activePath)
+        {
+            //var menuTree = new List<ItemNode>();
+            var tmpNode = new ItemNode();
+            tmpNode.SubItems = new List<ItemNode>();
+
+            var xDoc = XElement.Load(xmlFile);
+
+            var rootChildren = xDoc.Elements();
+            recursionHell(xDoc);
+            return parseMenuTree(menuTree,activePath);
+        }
+
+        private static string PrintXMLMenu2(string xmlFile, string activePath)
         {
             var menuTree = new List<ItemNode>();
             var tmpNode = new ItemNode();
@@ -101,9 +116,42 @@ namespace GenerateMenu
             return retNode;
         }
 
+        /* 
+         * Prints menu tree to console (with active item)
+         */
+        private static string parseMenuTree(List<ItemNode> menuTree, string activeNode)
+        {
 
+            return "TODO: print the tree after iterating through each item";
+        }
 
-
+        private static void recursionHell(XElement rootNode)
+        {
+            var tmpNode =new ItemNode();
+            //analyze each node and either add to menu tree (if item node), or call this function with child element recursively
+            if (rootNode.Name == "item")
+            {
+                tmpNode = createNode(rootNode);
+                //add to list
+                menuTree.Add(tmpNode);//(createNode(rootNode));
+                Console.WriteLine(tmpNode.Name + ", " + tmpNode.Path);
+            }
+            if (rootNode.Name == "menu")
+            {
+                foreach (var node in rootNode.Elements())
+                {
+                    recursionHell(node);
+                }
+            }
+            if ( rootNode.Element("subMenu")!= null)
+            {
+                //recursionHell(rootNode.Elements("subMenu").GetEnumerator());
+                foreach (var x in rootNode.Element("subMenu").Elements())
+                {
+                    recursionHell(x);
+                }
+            }
+        }
 
         private static string ParseXmlRecursive(string xmlFile, string targetPath)
         {
