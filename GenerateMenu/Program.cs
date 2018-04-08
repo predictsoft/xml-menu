@@ -44,14 +44,13 @@ namespace GenerateMenu
                 Console.WriteLine("File not found (" + args[0] + "). Please make sure file exists in the given location. This program will now exit");
                 return;
             }
+            activePath = args[1];
 
             //Console.WriteLine(parseXMLBruteforce(args[0], args[1]));
             //Console.WriteLine(ParseXmlRecursive(args[0], args[1]));
-            //Console.WriteLine(PrintXMLMenu("./menu2.xml",args[1]));
+            Console.WriteLine(PrintXMLMenu("./menu2.xml",args[1]));
 
-            activePath = args[1];
-
-            Console.WriteLine(PrintXMLMenu(args[0], args[1]));
+            //Console.WriteLine(PrintXMLMenu(args[0], args[1]));
         }
 
         private static string PrintXMLMenu(string xmlFile, string activePath)
@@ -144,12 +143,16 @@ namespace GenerateMenu
             StringBuilder outstr = new StringBuilder();
             foreach (var item in menuTree)
             {
-                outstr.Append(item.Name + ", " + item.Path + (item.IsActive ? "  ACTIVE" : "") + "\r\n");
-                if (item.SubItems != null)
+                if (item != null)
                 {
-                    foreach (var subitem in item.SubItems)
+                    outstr.Append(item.Name + ", " + item.Path + (item.IsActive ? "  ACTIVE" : "") + "\r\n");
+                    if (item.SubItems != null)
                     {
-                        outstr.Append("\t" + subitem.Name + ", " + subitem.Path + (subitem.IsActive ? "  ACTIVE" : "") + "\r\n");
+                        foreach (var subitem in item.SubItems)
+                        {
+                            outstr.Append("\t" + subitem.Name + ", " + subitem.Path +
+                                          (subitem.IsActive ? "  ACTIVE" : "") + "\r\n");
+                        }
                     }
                 }
             }
