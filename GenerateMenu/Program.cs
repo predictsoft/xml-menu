@@ -168,6 +168,7 @@ namespace GenerateMenu
              *                  buildTree(ccN)
              */
             var tmpNode = new ItemNode();
+            var tmpChildNode = new ItemNode();
             if (rootNode.Name == "item")
             {
                 tmpNode = createNode(rootNode); //add to menu tree
@@ -176,8 +177,13 @@ namespace GenerateMenu
                     tmpNode.SubItems = new List<ItemNode>();
                     foreach (var childNode in rootNode.Elements("subMenu").Elements("item"))
                     {
-
-                        tmpNode.SubItems.Add(BuildTree(childNode));
+                        tmpChildNode = BuildTree(childNode);
+                        if (tmpChildNode.IsActive)
+                        {
+                            //child is an active node, so the parent will be one as well
+                            tmpNode.IsActive = true;
+                        }
+                        tmpNode.SubItems.Add(tmpChildNode);
                         //TODO: maybe a global string to check for active item?
                     }
                 }
