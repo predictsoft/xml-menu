@@ -17,11 +17,16 @@ namespace GenerateMenu
         public string Path { get; set; }
         public bool IsActive { get; set; }
         public List<ItemNode> SubItems { get; set; }
+        public ItemNode()
+        {
+            this.IsActive = false;
+        }
     }
 
     class Program
     {
         static List<ItemNode> menuTree = new List<ItemNode>();
+        private static string activePath = "";
 
         static void Main(string[] args)
         {
@@ -43,6 +48,9 @@ namespace GenerateMenu
             //Console.WriteLine(parseXMLBruteforce(args[0], args[1]));
             //Console.WriteLine(ParseXmlRecursive(args[0], args[1]));
             //Console.WriteLine(PrintXMLMenu("./menu2.xml",args[1]));
+
+            activePath = args[1];
+
             Console.WriteLine(PrintXMLMenu(args[0], args[1]));
         }
 
@@ -62,7 +70,7 @@ namespace GenerateMenu
             {
                 menu.Add(BuildTree(node));
             }
-            return parseMenuTree(menuTree, activePath);
+            return parseMenuTree(menu);
         }
 
         private static string PrintXMLMenu2(string xmlFile, string activePath)
@@ -118,6 +126,11 @@ namespace GenerateMenu
             if (elPath != null && elPath.Attribute("value") != null)
             {
                 retNode.Path = elPath.Attribute("value").Value;
+                if (retNode.Path.Equals(activePath))
+                {
+                    //this is active path
+                    retNode.IsActive = true;
+                }
             }
 
             return retNode;
@@ -126,10 +139,21 @@ namespace GenerateMenu
         /* 
          * Prints menu tree to console (with active item)
          */
-        private static string parseMenuTree(List<ItemNode> menuTree, string activeNode)
+        private static string parseMenuTree(List<ItemNode> menuTree)
         {
-
-            return "TODO: print the tree after iterating through each item";
+            StringBuilder outstr = new StringBuilder();
+            foreach (var item in menuTree)
+            {
+                outstr.Append(item.Name + ", " + item.Path + (item.IsActive ? "  ACTIVE" : "") + "\r\n");
+                if (item.SubItems != null)
+                {
+                    foreach (var subitem in item.SubItems)
+                    {
+                        outstr.Append("\t" + subitem.Name + ", " + subitem.Path + (subitem.IsActive ? "  ACTIVE" : "") + "\r\n");
+                    }
+                }
+            }
+            return outstr.ToString();
         }
 
         private static ItemNode BuildTree(XElement rootNode)
