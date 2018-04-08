@@ -51,7 +51,7 @@ namespace GenerateMenu
 
             Console.WriteLine(PrintXMLMenu(args[0], activePath));
 
-            activePath = "/PASS/Pending/PendingRequests.aspx"; 
+            activePath = "/TWR/AircraftSearch.aspx"; //"/PASS/Pending/PendingRequests.aspx"; 
             Console.WriteLine("\r\n===============menu2=====================\r\n");
             Console.WriteLine(PrintXMLMenu("./menu2.xml", activePath));
 
@@ -73,7 +73,14 @@ namespace GenerateMenu
             {
                 menu.Add(BuildTree(node));
             }
-            return parseMenuTree(menu);
+
+            menu.RemoveAll(node => node == null);   //clean menu list
+            foreach (var menuItem in menu)
+            {
+                printNode(menuItem,"");
+            }
+            return "";
+            //return parseMenuTree(menu);
         }
 
         private static string PrintXMLMenu2(string xmlFile, string activePath)
@@ -198,6 +205,25 @@ namespace GenerateMenu
             {
                 return null;
             }
+        }
+
+        private static void printNode(ItemNode menuItem,string tab)
+        {
+            Console.WriteLine(tab + menuItem.Name + ", " + menuItem.Path + (menuItem.IsActive ? "  ACTIVE" : ""));
+            /*if (menuItem.SubItems == null)
+            {
+                    Console.WriteLine(menuItem.Name + ", " + menuItem.Path + (menuItem.IsActive ? "  ACTIVE" : "") + "\r\n");
+            }
+            else
+            {*/
+            if (menuItem.SubItems != null) { 
+                foreach (var subItem in menuItem.SubItems)
+                {
+                    //Console.WriteLine("\t");
+                    printNode(subItem,"\t");
+                }
+            }
+            
         }
 
         private static void recursionHell(XElement rootNode)
